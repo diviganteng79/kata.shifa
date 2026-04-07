@@ -10,6 +10,7 @@
       --card: #ffffff;
       --text: #111;
       --accent: #2a2a2a;
+      --paper-image: url("./assets/images/foto-shifa.jpg");
     }
 
     * { box-sizing: border-box; }
@@ -37,7 +38,11 @@
     #paper {
       width: min(860px, 100%);
       height: min(90dvh, 760px);
-      background: var(--card);
+      background-color: var(--card);
+      background-image: linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.78)), var(--paper-image);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       border-radius: 10px;
       padding: clamp(18px, 3vw, 36px);
       overflow: hidden;
@@ -123,10 +128,14 @@
   </main>
 
   <script>
+    // Ganti foto latar kertas di sini (pastikan file ada di assets/images).
+    const PAPER_IMAGE_NAME = "foto-shifa.jpg";
+
     // Musik tetap dari folder assets/audio.
     const MUSIC_NAME = "Menua Bersamamu - Tri Suaka  Kalimba Cover with Tabs.mp3";
     const FILE_VERSION = "1";
     const MUSIC_URL = `./assets/audio/${encodeURIComponent(MUSIC_NAME)}`;
+    document.documentElement.style.setProperty("--paper-image", `url(./assets/images/${encodeURIComponent(PAPER_IMAGE_NAME)})`);
 
     // Teks berjalan ke atas (muncul satu per satu, tidak hilang).
     const MESSAGE_LINES = [
