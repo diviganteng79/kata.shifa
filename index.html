@@ -74,12 +74,16 @@
   </main>
 
   <script>
-    // URL file lokal dari folder repo
-    const FILE_URL = "./assets/doc/SHIFA%20DI%20BULAN%20APRIL.pdf";
-    const MUSIC_URL = "./assets/audio/Menua%20Bersamamu%20-%20Tri%20Suaka%20%20Kalimba%20Cover%20with%20Tabs.mp3";
+    // Ganti NAMA FILE SAJA (boleh ada spasi). Path folder tetap pakai assets/doc dan assets/audio.
+    const FILE_NAME = "SHIFA DI BULAN APRIL.pdf";
+    const MUSIC_NAME = "Menua Bersamamu - Tri Suaka  Kalimba Cover with Tabs.mp3";
 
-    // Cache-busting: ubah nilai ini saat file diperbarui
+    // Cache-busting: naikkan angka saat ganti isi file dengan nama yang sama.
     const FILE_VERSION = "1";
+
+    // Bangun URL lokal dengan encoding aman agar nama file yang ada spasi tetap valid.
+    const FILE_URL = `./assets/doc/${encodeURIComponent(FILE_NAME)}`;
+    const MUSIC_URL = `./assets/audio/${encodeURIComponent(MUSIC_NAME)}`;
 
     const statusEl = document.getElementById("status");
     const viewerEl = document.getElementById("viewer");
@@ -103,17 +107,24 @@
       return "unknown";
     }
 
+    async function canAccess(url) {
+      try {
+        const response = await fetch(url, { method: "GET", cache: "no-store" });
+        return response.ok;
+      } catch {
+        return false;
+      }
+    }
+
     function buildIframeSources(fileUrl) {
       const versionedUrl = appendVersion(fileUrl, FILE_VERSION);
       const absoluteVersionedUrl = new URL(versionedUrl, window.location.href).href;
       const absoluteRawUrl = new URL(fileUrl, window.location.href).href;
       const ext = getExtension(fileUrl);
 
-      // PDF aman pakai cache-busting
       if (ext === "pdf") return [absoluteVersionedUrl];
 
       if (ext === "doc" || ext === "docx") {
-        // Coba Office Viewer dulu, lalu fallback ke Google Docs Viewer
         return [
           `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(absoluteRawUrl)}`,
           `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(absoluteRawUrl)}`
@@ -144,18 +155,25 @@
       window.addEventListener("pointerdown", resumeOnFirstTouch);
     }
 
-    function loadDocument() {
+    async function loadDocument() {
+      const fileCheckUrl = new URL(appendVersion(FILE_URL, FILE_VERSION), window.location.href).href;
+      const exists = await canAccess(fileCheckUrl);
+
+      if (!exists) {
+        statusEl.classList.remove("hide");
+        statusEl.textContent = `File tidak ditemukan. Cek nama/path: ${decodeURIComponent(FILE_URL)}`;
+        return;
+      }
+
       const sources = buildIframeSources(FILE_URL);
       let sourceIndex = 0;
 
       function loadCurrentSource() {
         const iframeSrc = sources[sourceIndex];
 
-        // Reset status sebelum mencoba source baru
         statusEl.classList.remove("hide");
         statusEl.textContent = "Memuat dokumen...";
 
-        // Jika viewer eksternal lama merespons, jangan biarkan loading selamanya
         const loadingGuard = setTimeout(() => {
           if (!statusEl.classList.contains("hide")) {
             if (sourceIndex < sources.length - 1) {
@@ -163,7 +181,7 @@
               loadCurrentSource();
               return;
             }
-            statusEl.textContent = "Dokumen belum bisa ditampilkan. Pastikan file publik dan coba ubah ke PDF.";
+            statusEl.textContent = "Dokumen belum bisa ditampilkan. Jika DOCX di HP bermasalah, ubah file ke PDF.";
           }
         }, 12000);
 
@@ -179,7 +197,7 @@
             loadCurrentSource();
             return;
           }
-          statusEl.textContent = `Dokumen gagal dimuat. Cek URL file publik: ${iframeSrc}`;
+          statusEl.textContent = `Dokumen gagal dimuat. Cek URL sumber: ${iframeSrc}`;
         };
 
         viewerEl.src = iframeSrc;
