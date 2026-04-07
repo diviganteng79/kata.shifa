@@ -3,14 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Viewer Dokumen</title>
+  <title>SHIFA DI BULAN APRIL</title>
   <style>
+    :root {
+      --bg: #111;
+      --card: #ffffff;
+      --text: #111;
+      --accent: #2a2a2a;
+    }
+
+    * { box-sizing: border-box; }
+
     html, body {
       width: 100%;
       height: 100%;
       margin: 0;
       overflow: hidden;
-      background: #111;
+      background: var(--bg);
       font-family: Arial, Helvetica, sans-serif;
     }
 
@@ -19,225 +28,159 @@
       inset: 0;
       width: 100vw;
       height: 100dvh;
-      background: #111;
-    }
-
-    #viewer {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      display: block;
-      background: #fff;
-    }
-
-    #status {
-      position: absolute;
-      inset: 0;
       display: grid;
       place-items: center;
       padding: 16px;
-      text-align: center;
-      color: #fff;
-      background: #111;
-      z-index: 1;
+      background: radial-gradient(circle at center, #2a2a2a 0%, #111 65%);
     }
 
-    #status.hide {
-      display: none;
+    #paper {
+      width: min(860px, 100%);
+      height: min(90dvh, 760px);
+      background: var(--card);
+      border-radius: 10px;
+      padding: clamp(18px, 3vw, 36px);
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      border: 1px solid #d8d8d8;
+      position: relative;
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      font-size: clamp(22px, 3.2vw, 34px);
+      text-align: center;
+      letter-spacing: .4px;
+      color: var(--text);
+    }
+
+    #lineStage {
+      height: calc(100% - 72px);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 14px;
+      overflow: hidden;
+      transition: justify-content 650ms ease;
+    }
+
+    #lineStage.final {
+      justify-content: center;
+    }
+
+    .line {
+      margin: 0;
+      font-size: clamp(17px, 2.2vw, 30px);
+      line-height: 1.35;
+      color: #111;
+      opacity: 0;
+      transform: translateY(34px);
+      animation: riseIn 900ms ease forwards;
+      word-wrap: break-word;
+      text-align: left;
+    }
+
+    .line b {
+      font-style: italic;
+      font-weight: 700;
     }
 
     #musicPrompt {
       position: absolute;
-      right: 12px;
-      bottom: 12px;
-      z-index: 2;
+      right: 14px;
+      bottom: 14px;
+      z-index: 5;
       border: 0;
       border-radius: 10px;
       padding: 10px 14px;
       font-size: 14px;
       color: #fff;
       background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
       display: none;
     }
 
-    #musicPrompt.show {
-      display: inline-block;
+    #musicPrompt.show { display: inline-block; }
+
+    @keyframes riseIn {
+      from {
+        opacity: 0;
+        transform: translateY(34px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
 <body>
   <main id="app">
-    <div id="status">Memuat dokumen...</div>
-    <iframe id="viewer" title="Penampil Dokumen" referrerpolicy="no-referrer"></iframe>
+    <section id="paper" aria-label="Pesan untuk Shifa">
+      <h1>SHIFA DI BULAN APRIL</h1>
+      <div id="lineStage"></div>
+    </section>
     <button id="musicPrompt" type="button">Tap untuk putar musik</button>
   </main>
 
   <script>
-    // Ganti NAMA FILE SAJA (boleh ada spasi). Path folder tetap pakai assets/doc dan assets/audio.
-    const FILE_NAME = "SHIFA DI BULAN APRIL.pdf";
+    // Musik tetap dari folder assets/audio.
     const MUSIC_NAME = "Menua Bersamamu - Tri Suaka  Kalimba Cover with Tabs.mp3";
-
-    // Cache-busting: naikkan angka saat ganti isi file dengan nama yang sama.
     const FILE_VERSION = "1";
-
-    // Bangun URL lokal dengan encoding aman agar nama file yang ada spasi tetap valid.
-    const FILE_URL = `./assets/doc/${encodeURIComponent(FILE_NAME)}`;
     const MUSIC_URL = `./assets/audio/${encodeURIComponent(MUSIC_NAME)}`;
 
-    const statusEl = document.getElementById("status");
-    const viewerEl = document.getElementById("viewer");
-    const musicPromptEl = document.getElementById("musicPrompt");
+    // Teks berjalan ke atas (muncul satu per satu, tidak hilang).
+    const MESSAGE_LINES = [
+      '<b>Shifa 07/04/2026</b>, Aku juga sayang ayang',
+      '<b>Shifa 07/04/2026</b>, Jangan sayang, buat ayang ajaaa',
+      '<b>Shifa 07/04/2026</b>, Iya sayang makasih ayang uda perhatian ke aku, tapi aku gak mau kalo sampe ayang ke susahan karna aku',
+      '<b>Shifa 07/04/2026</b>, Sayang makasih yaa, Buat semuanya'
+    ];
+
+    const lineStageEl = document.getElementById('lineStage');
+    const musicPromptEl = document.getElementById('musicPrompt');
 
     const bgMusic = new Audio();
-    bgMusic.src = `${MUSIC_URL}${MUSIC_URL.includes("?") ? "&" : "?"}v=${encodeURIComponent(FILE_VERSION)}`;
+    bgMusic.src = `${MUSIC_URL}${MUSIC_URL.includes('?') ? '&' : '?'}v=${encodeURIComponent(FILE_VERSION)}`;
     bgMusic.loop = true;
-    bgMusic.preload = "auto";
-
-    function appendVersion(url, version) {
-      const separator = url.includes("?") ? "&" : "?";
-      return `${url}${separator}v=${encodeURIComponent(version)}`;
-    }
-
-    function getExtension(url) {
-      const cleaned = decodeURIComponent(url.split("?")[0].split("#")[0]).toLowerCase();
-      if (cleaned.endsWith(".pdf")) return "pdf";
-      if (cleaned.endsWith(".doc")) return "doc";
-      if (cleaned.endsWith(".docx")) return "docx";
-      return "unknown";
-    }
-
-    async function canAccess(url) {
-      try {
-        const response = await fetch(url, { method: "GET", cache: "no-store" });
-        return response.ok;
-      } catch {
-        return false;
-      }
-    }
-
-
-    async function isPdfBinary(url) {
-      try {
-        const response = await fetch(url, { method: "GET", cache: "no-store" });
-        if (!response.ok) return false;
-        const bytes = new Uint8Array(await response.arrayBuffer());
-        // PDF valid harus diawali signature: %PDF-
-        return (
-          bytes.length >= 5 &&
-          bytes[0] === 0x25 &&
-          bytes[1] === 0x50 &&
-          bytes[2] === 0x44 &&
-          bytes[3] === 0x46 &&
-          bytes[4] === 0x2d
-        );
-      } catch {
-        return false;
-      }
-    }
-
-    function buildIframeSources(fileUrl) {
-      const versionedUrl = appendVersion(fileUrl, FILE_VERSION);
-      const absoluteVersionedUrl = new URL(versionedUrl, window.location.href).href;
-      const absoluteRawUrl = new URL(fileUrl, window.location.href).href;
-      const ext = getExtension(fileUrl);
-
-      if (ext === "pdf") return [absoluteVersionedUrl];
-
-      if (ext === "doc" || ext === "docx") {
-        return [
-          `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(absoluteRawUrl)}`,
-          `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(absoluteRawUrl)}`
-        ];
-      }
-
-      return [absoluteVersionedUrl];
-    }
+    bgMusic.preload = 'auto';
 
     async function startMusic() {
       try {
         await bgMusic.play();
-        musicPromptEl.classList.remove("show");
+        musicPromptEl.classList.remove('show');
       } catch {
-        musicPromptEl.classList.add("show");
+        musicPromptEl.classList.add('show');
       }
     }
 
     function setupMusicFallback() {
-      musicPromptEl.addEventListener("click", async () => {
+      musicPromptEl.addEventListener('click', async () => {
         await startMusic();
       });
 
       const resumeOnFirstTouch = async () => {
         if (bgMusic.paused) await startMusic();
-        window.removeEventListener("pointerdown", resumeOnFirstTouch);
+        window.removeEventListener('pointerdown', resumeOnFirstTouch);
       };
-      window.addEventListener("pointerdown", resumeOnFirstTouch);
+      window.addEventListener('pointerdown', resumeOnFirstTouch);
     }
 
-    async function loadDocument() {
-      const fileCheckUrl = new URL(appendVersion(FILE_URL, FILE_VERSION), window.location.href).href;
-      const exists = await canAccess(fileCheckUrl);
-
-      if (!exists) {
-        statusEl.classList.remove("hide");
-        statusEl.textContent = `File tidak ditemukan. Cek nama/path: ${decodeURIComponent(FILE_URL)}`;
+    function appendNextLine(index = 0) {
+      if (index >= MESSAGE_LINES.length) {
+        lineStageEl.classList.add('final');
         return;
       }
 
-      const ext = getExtension(FILE_URL);
-      if (ext === "pdf") {
-        const pdfValid = await isPdfBinary(fileCheckUrl);
-        if (!pdfValid) {
-          statusEl.classList.remove("hide");
-          statusEl.textContent = "File berekstensi .pdf tetapi isinya bukan PDF valid. Export ulang ke PDF (jangan hanya rename dari DOCX).";
-          return;
-        }
-      }
+      const p = document.createElement('p');
+      p.className = 'line';
+      p.innerHTML = MESSAGE_LINES[index];
+      lineStageEl.appendChild(p);
 
-      const sources = buildIframeSources(FILE_URL);
-      let sourceIndex = 0;
-
-      function loadCurrentSource() {
-        const iframeSrc = sources[sourceIndex];
-
-        statusEl.classList.remove("hide");
-        statusEl.textContent = "Memuat dokumen...";
-
-        const loadingGuard = setTimeout(() => {
-          if (!statusEl.classList.contains("hide")) {
-            if (sourceIndex < sources.length - 1) {
-              sourceIndex += 1;
-              loadCurrentSource();
-              return;
-            }
-            statusEl.textContent = "Dokumen belum bisa ditampilkan. Jika DOCX di HP bermasalah, ubah file ke PDF.";
-          }
-        }, 12000);
-
-        viewerEl.onload = () => {
-          clearTimeout(loadingGuard);
-          statusEl.classList.add("hide");
-        };
-
-        viewerEl.onerror = () => {
-          clearTimeout(loadingGuard);
-          if (sourceIndex < sources.length - 1) {
-            sourceIndex += 1;
-            loadCurrentSource();
-            return;
-          }
-          statusEl.textContent = `Dokumen gagal dimuat. Cek URL sumber: ${iframeSrc}`;
-        };
-
-        viewerEl.src = iframeSrc;
-      }
-
-      loadCurrentSource();
+      setTimeout(() => appendNextLine(index + 1), 1300);
     }
 
-    window.addEventListener("DOMContentLoaded", async () => {
-      loadDocument();
+    window.addEventListener('DOMContentLoaded', async () => {
+      appendNextLine(0);
       setupMusicFallback();
       await startMusic();
     });
