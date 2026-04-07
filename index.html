@@ -1,11 +1,13 @@
+index.htmlindex.html
+Baru
++158-0
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Viewer Dokumen Firebase</title>
+  <title>Viewer Dokumen</title>
   <style>
-    /* Layout full-screen: tidak ada scroll di luar iframe */
     html, body {
       width: 100%;
       height: 100%;
@@ -47,7 +49,6 @@
       display: none;
     }
 
-    /* Tombol fallback jika autoplay musik diblokir browser */
     #musicPrompt {
       position: absolute;
       right: 12px;
@@ -75,39 +76,18 @@
     <button id="musicPrompt" type="button">Tap untuk putar musik</button>
   </main>
 
-  <script type="module">
-    // Firebase v9 modular SDK
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getStorage } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+  <script>
+    // URL file lokal dari folder repo
+    const FILE_URL = "./assets/doc/SHIFA%20DI%20BULAN%20APRIL.docx";
+    const MUSIC_URL = "./assets/audio/Menua%20Bersamamu%20-%20Tri%20Suaka%20%20Kalimba%20Cover%20with%20Tabs.mp3";
 
-    // Placeholder konfigurasi Firebase (ganti dengan project Anda)
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-
-    // Inisialisasi Firebase
-    const app = initializeApp(firebaseConfig);
-    getStorage(app);
-
-    // URL file Firebase Storage yang mudah diganti
-    const FILE_URL = "https://firebasestorage.googleapis.com/v0/b/YOUR_PROJECT_ID.appspot.com/o/folder%2Fnama-file.pdf?alt=media";
-
-    // URL musik latar (boleh dari Firebase Storage juga, file publik)
-    const MUSIC_URL = "https://firebasestorage.googleapis.com/v0/b/YOUR_PROJECT_ID.appspot.com/o/folder%2Fbg-music.mp3?alt=media";
-
-    // Versi cache-busting (ubah nilainya saat file diperbarui)
+    // Cache-busting: ubah nilai ini saat file diperbarui
     const FILE_VERSION = "1";
 
     const statusEl = document.getElementById("status");
     const viewerEl = document.getElementById("viewer");
     const musicPromptEl = document.getElementById("musicPrompt");
 
-    // Audio element dibuat via JS agar tetap single-file sederhana
     const bgMusic = new Audio();
     bgMusic.src = `${MUSIC_URL}${MUSIC_URL.includes("?") ? "&" : "?"}v=${encodeURIComponent(FILE_VERSION)}`;
     bgMusic.loop = true;
@@ -119,7 +99,6 @@
     }
 
     function getExtension(url) {
-      // Ambil ekstensi dengan aman dari URL (mendukung URL ter-encode)
       const cleaned = decodeURIComponent(url.split("?")[0].split("#")[0]).toLowerCase();
       if (cleaned.endsWith(".pdf")) return "pdf";
       if (cleaned.endsWith(".doc")) return "doc";
@@ -131,15 +110,12 @@
       const versionedUrl = appendVersion(fileUrl, FILE_VERSION);
       const ext = getExtension(fileUrl);
 
-      // PDF: tampilkan langsung
       if (ext === "pdf") return versionedUrl;
 
-      // DOC/DOCX: gunakan Google Docs Viewer
       if (ext === "doc" || ext === "docx") {
         return `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(versionedUrl)}`;
       }
 
-      // Fallback untuk tipe lain
       return versionedUrl;
     }
 
@@ -148,7 +124,6 @@
         await bgMusic.play();
         musicPromptEl.classList.remove("show");
       } catch {
-        // Jika autoplay diblokir browser, minta interaksi user
         musicPromptEl.classList.add("show");
       }
     }
@@ -158,7 +133,6 @@
         await startMusic();
       });
 
-      // Beberapa browser hanya mengizinkan play setelah interaksi pertama
       const resumeOnFirstTouch = async () => {
         if (bgMusic.paused) await startMusic();
         window.removeEventListener("pointerdown", resumeOnFirstTouch);
@@ -171,13 +145,12 @@
 
       viewerEl.onload = () => statusEl.classList.add("hide");
       viewerEl.onerror = () => {
-        statusEl.textContent = "Dokumen gagal dimuat. Cek FILE_URL dan izin akses file.";
+        statusEl.textContent = "Dokumen gagal dimuat. Cek FILE_URL dan akses file publik.";
       };
 
       viewerEl.src = iframeSrc;
     }
 
-    // Otomatis tampilkan dokumen dan coba putar musik saat halaman dibuka
     window.addEventListener("DOMContentLoaded", async () => {
       loadDocument();
       setupMusicFallback();
