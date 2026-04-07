@@ -103,21 +103,24 @@
       return "unknown";
     }
 
-    function buildIframeSource(fileUrl) {
+    function buildIframeSources(fileUrl) {
       const versionedUrl = appendVersion(fileUrl, FILE_VERSION);
       const absoluteVersionedUrl = new URL(versionedUrl, window.location.href).href;
       const absoluteRawUrl = new URL(fileUrl, window.location.href).href;
       const ext = getExtension(fileUrl);
 
       // PDF aman pakai cache-busting
-      if (ext === "pdf") return absoluteVersionedUrl;
+      if (ext === "pdf") return [absoluteVersionedUrl];
 
       if (ext === "doc" || ext === "docx") {
-        // Office Viewer kadang gagal jika src memiliki query parameter tambahan
-        return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(absoluteRawUrl)}`;
+        // Coba Office Viewer dulu, lalu fallback ke Google Docs Viewer
+        return [
+          `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(absoluteRawUrl)}`,
+          `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(absoluteRawUrl)}`
+        ];
       }
 
-      return absoluteVersionedUrl;
+      return [absoluteVersionedUrl];
     }
 
     async function startMusic() {
@@ -142,22 +145,47 @@
     }
 
     function loadDocument() {
-      const iframeSrc = buildIframeSource(FILE_URL);
+      const sources = buildIframeSources(FILE_URL);
+      let sourceIndex = 0;
 
-      viewerEl.onload = () => statusEl.classList.add("hide");
+      function loadCurrentSource() {
+        const iframeSrc = sources[sourceIndex];
 
-      // Jika viewer eksternal lama merespons, jangan biarkan loading selamanya
-      const loadingGuard = setTimeout(() => {
-        if (!statusEl.classList.contains("hide")) {
-          statusEl.textContent = "Dokumen masih dimuat. Jika DOCX gagal tampil di HP, ubah file ke PDF agar kompatibel.";
-        }
-      }, 12000);
-      viewerEl.onerror = () => {
-        statusEl.textContent = `Dokumen gagal dimuat. Cek URL file publik: ${iframeSrc}`;
-      };
+        // Reset status sebelum mencoba source baru
+        statusEl.classList.remove("hide");
+        statusEl.textContent = "Memuat dokumen...";
 
-      viewerEl.src = iframeSrc;
-      viewerEl.addEventListener("load", () => clearTimeout(loadingGuard), { once: true });
+        // Jika viewer eksternal lama merespons, jangan biarkan loading selamanya
+        const loadingGuard = setTimeout(() => {
+          if (!statusEl.classList.contains("hide")) {
+            if (sourceIndex < sources.length - 1) {
+              sourceIndex += 1;
+              loadCurrentSource();
+              return;
+            }
+            statusEl.textContent = "Dokumen belum bisa ditampilkan. Pastikan file publik dan coba ubah ke PDF.";
+          }
+        }, 12000);
+
+        viewerEl.onload = () => {
+          clearTimeout(loadingGuard);
+          statusEl.classList.add("hide");
+        };
+
+        viewerEl.onerror = () => {
+          clearTimeout(loadingGuard);
+          if (sourceIndex < sources.length - 1) {
+            sourceIndex += 1;
+            loadCurrentSource();
+            return;
+          }
+          statusEl.textContent = `Dokumen gagal dimuat. Cek URL file publik: ${iframeSrc}`;
+        };
+
+        viewerEl.src = iframeSrc;
+      }
+
+      loadCurrentSource();
     }
 
     window.addEventListener("DOMContentLoaded", async () => {
