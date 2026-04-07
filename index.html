@@ -105,16 +105,19 @@
 
     function buildIframeSource(fileUrl) {
       const versionedUrl = appendVersion(fileUrl, FILE_VERSION);
-      const absoluteUrl = new URL(versionedUrl, window.location.href).href;
+      const absoluteVersionedUrl = new URL(versionedUrl, window.location.href).href;
+      const absoluteRawUrl = new URL(fileUrl, window.location.href).href;
       const ext = getExtension(fileUrl);
 
-      if (ext === "pdf") return absoluteUrl;
+      // PDF aman pakai cache-busting
+      if (ext === "pdf") return absoluteVersionedUrl;
 
       if (ext === "doc" || ext === "docx") {
-        return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(absoluteUrl)}`;
+        // Office Viewer kadang gagal jika src memiliki query parameter tambahan
+        return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(absoluteRawUrl)}`;
       }
 
-      return absoluteUrl;
+      return absoluteVersionedUrl;
     }
 
     async function startMusic() {
@@ -150,7 +153,7 @@
         }
       }, 12000);
       viewerEl.onerror = () => {
-        statusEl.textContent = "Dokumen gagal dimuat. Cek FILE_URL dan akses file publik.";
+        statusEl.textContent = `Dokumen gagal dimuat. Cek URL file publik: ${iframeSrc}`;
       };
 
       viewerEl.src = iframeSrc;
