@@ -111,7 +111,7 @@
       if (ext === "pdf") return absoluteUrl;
 
       if (ext === "doc" || ext === "docx") {
-        return `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(absoluteUrl)}`;
+        return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(absoluteUrl)}`;
       }
 
       return absoluteUrl;
@@ -142,11 +142,19 @@
       const iframeSrc = buildIframeSource(FILE_URL);
 
       viewerEl.onload = () => statusEl.classList.add("hide");
+
+      // Jika viewer eksternal lama merespons, jangan biarkan loading selamanya
+      const loadingGuard = setTimeout(() => {
+        if (!statusEl.classList.contains("hide")) {
+          statusEl.textContent = "Dokumen masih dimuat. Jika DOCX gagal tampil di HP, ubah file ke PDF agar kompatibel.";
+        }
+      }, 12000);
       viewerEl.onerror = () => {
         statusEl.textContent = "Dokumen gagal dimuat. Cek FILE_URL dan akses file publik.";
       };
 
       viewerEl.src = iframeSrc;
+      viewerEl.addEventListener("load", () => clearTimeout(loadingGuard), { once: true });
     }
 
     window.addEventListener("DOMContentLoaded", async () => {
