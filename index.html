@@ -1,19 +1,164 @@
-iv id="lineStage"></div>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>SHIFA DI BULAN APRIL</title>
+  <style>
+    :root {
+      --bg: #111;
+      --card: #ffffff;
+      --text: #111;
+      --accent: #2a2a2a;
+      --paper-image: url("./assets/images/foto-shifa.jpeg");
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    #app {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: radial-gradient(circle at center, #2a2a2a 0%, #111 65%);
+    }
+
+    #paper {
+      width: min(860px, 100%);
+      height: min(90dvh, 760px);
+      background-color: var(--card);
+      background-image: linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.78)), var(--paper-image);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border-radius: 10px;
+      padding: clamp(18px, 3vw, 36px);
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      border: 1px solid #d8d8d8;
+      position: relative;
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      font-size: clamp(22px, 3.2vw, 34px);
+      text-align: center;
+      letter-spacing: .4px;
+      color: var(--text);
+    }
+
+    #lineStage {
+      height: calc(100% - 72px);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 14px;
+      overflow: hidden;
+      transition: justify-content 650ms ease;
+    }
+
+    #lineStage.final {
+      justify-content: center;
+    }
+
+    .line {
+      margin: 0;
+      font-size: clamp(17px, 2.2vw, 30px);
+      line-height: 1.35;
+      color: #111;
+      opacity: 0;
+      transform: translateY(34px);
+      animation: riseIn 900ms ease forwards;
+      word-wrap: break-word;
+      text-align: left;
+    }
+
+    .line b {
+      font-style: italic;
+      font-weight: 700;
+    }
+
+    #musicPrompt {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      z-index: 5;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+    }
+
+    #musicPrompt.show { display: inline-block; }
+
+    #photoHint {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      z-index: 5;
+      margin: 0;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #fff;
+      background: rgba(176, 0, 32, 0.85);
+      display: none;
+      max-width: min(92vw, 420px);
+    }
+
+    #photoHint.show { display: block; }
+
+    @keyframes riseIn {
+      from {
+        opacity: 0;
+        transform: translateY(34px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="app">
+    <section id="paper" aria-label="Pesan untuk Shifa">
+      <h1>SHIFA DI BULAN APRIL</h1>
+      <div id="lineStage"></div>
     </section>
     <button id="musicPrompt" type="button">Tap untuk putar musik</button>
     <p id="photoHint">Foto background tidak ditemukan. Upload ke assets/images lalu sesuaikan nama file.</p>
   </main>
 
   <script>
-    // Ganti foto latar kertas di sini (pastikan file ada di assets/images).
+    // Nama file foto. Script akan mencoba beberapa folder otomatis.
     const PAPER_IMAGE_NAME = "foto-shifa.jpeg";
-    const PAPER_IMAGE_URL = `./assets/images/${encodeURIComponent(PAPER_IMAGE_NAME)}`;
+    const PAPER_IMAGE_CANDIDATES = [
+      `./assets/images/${encodeURIComponent(PAPER_IMAGE_NAME)}`,
+      `./assets/image/${encodeURIComponent(PAPER_IMAGE_NAME)}`,
+      `./assets/${encodeURIComponent(PAPER_IMAGE_NAME)}`,
+      `./${encodeURIComponent(PAPER_IMAGE_NAME)}`
+    ];
 
     // Musik tetap dari folder assets/audio.
     const MUSIC_NAME = "Menua Bersamamu - Tri Suaka  Kalimba Cover with Tabs.mp3";
     const FILE_VERSION = "1";
     const MUSIC_URL = `./assets/audio/${encodeURIComponent(MUSIC_NAME)}`;
-    document.documentElement.style.setProperty("--paper-image", `url(${PAPER_IMAGE_URL})`);
 
     // Teks berjalan ke atas (muncul satu per satu, tidak hilang).
     const MESSAGE_LINES = [
@@ -55,16 +200,33 @@ iv id="lineStage"></div>
 
 
 
-    function validateBackgroundPhoto() {
-      const img = new Image();
-      img.onload = () => {
+
+
+    async function resolveFirstAvailable(urls) {
+      for (const baseUrl of urls) {
+        const testUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}v=${encodeURIComponent(FILE_VERSION)}`;
+        try {
+          const response = await fetch(testUrl, { method: 'GET', cache: 'no-store' });
+          if (response.ok) return baseUrl;
+        } catch {
+          // lanjut ke kandidat berikutnya
+        }
+      }
+      return null;
+    }
+
+    async function validateBackgroundPhoto() {
+      const resolvedUrl = await resolveFirstAvailable(PAPER_IMAGE_CANDIDATES);
+
+      if (resolvedUrl) {
+        document.documentElement.style.setProperty('--paper-image', `url(${resolvedUrl})`);
         photoHintEl.classList.remove('show');
-      };
-      img.onerror = () => {
-        photoHintEl.textContent = `Foto background tidak ditemukan: ${decodeURIComponent(PAPER_IMAGE_URL)}. Upload file ini ke repo GitHub.`;
-        photoHintEl.classList.add('show');
-      };
-      img.src = `${PAPER_IMAGE_URL}${PAPER_IMAGE_URL.includes('?') ? '&' : '?'}v=${encodeURIComponent(FILE_VERSION)}`;
+        return;
+      }
+
+      const tried = PAPER_IMAGE_CANDIDATES.map((u) => decodeURIComponent(u)).join(' | ');
+      photoHintEl.textContent = `Foto background belum ketemu. Coba cek path ini: ${tried}`;
+      photoHintEl.classList.add('show');
     }
 
     function appendNextLine(index = 0) {
