@@ -146,14 +146,20 @@
   </main>
 
   <script>
-    // Nama file foto. Script akan mencoba beberapa folder otomatis.
-    const PAPER_IMAGE_NAME = "foto-shifa.jpeg";
-    const PAPER_IMAGE_CANDIDATES = [
-      `./assets/images/${encodeURIComponent(PAPER_IMAGE_NAME)}`,
-      `./assets/image/${encodeURIComponent(PAPER_IMAGE_NAME)}`,
-      `./assets/${encodeURIComponent(PAPER_IMAGE_NAME)}`,
-      `./${encodeURIComponent(PAPER_IMAGE_NAME)}`
+    // Nama dasar foto (tanpa ekstensi). Script akan mencoba jpg/jpeg/jepg/png otomatis.
+    const PAPER_IMAGE_BASENAME = "foto-shifa";
+    const PAPER_IMAGE_NAMES = [
+      `${PAPER_IMAGE_BASENAME}.jpeg`,
+      `${PAPER_IMAGE_BASENAME}.jpg`,
+      `${PAPER_IMAGE_BASENAME}.jepg`,
+      `${PAPER_IMAGE_BASENAME}.png`
     ];
+    const PAPER_IMAGE_CANDIDATES = PAPER_IMAGE_NAMES.flatMap((name) => [
+      `./assets/images/${encodeURIComponent(name)}`,
+      `./assets/image/${encodeURIComponent(name)}`,
+      `./assets/${encodeURIComponent(name)}`,
+      `./${encodeURIComponent(name)}`
+    ]);
 
     // Musik tetap dari folder assets/audio.
     const MUSIC_NAME = "Menua Bersamamu - Tri Suaka  Kalimba Cover with Tabs.mp3";
