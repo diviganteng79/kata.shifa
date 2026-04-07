@@ -116,6 +116,26 @@
       }
     }
 
+
+    async function isPdfBinary(url) {
+      try {
+        const response = await fetch(url, { method: "GET", cache: "no-store" });
+        if (!response.ok) return false;
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        // PDF valid harus diawali signature: %PDF-
+        return (
+          bytes.length >= 5 &&
+          bytes[0] === 0x25 &&
+          bytes[1] === 0x50 &&
+          bytes[2] === 0x44 &&
+          bytes[3] === 0x46 &&
+          bytes[4] === 0x2d
+        );
+      } catch {
+        return false;
+      }
+    }
+
     function buildIframeSources(fileUrl) {
       const versionedUrl = appendVersion(fileUrl, FILE_VERSION);
       const absoluteVersionedUrl = new URL(versionedUrl, window.location.href).href;
@@ -163,6 +183,16 @@
         statusEl.classList.remove("hide");
         statusEl.textContent = `File tidak ditemukan. Cek nama/path: ${decodeURIComponent(FILE_URL)}`;
         return;
+      }
+
+      const ext = getExtension(FILE_URL);
+      if (ext === "pdf") {
+        const pdfValid = await isPdfBinary(fileCheckUrl);
+        if (!pdfValid) {
+          statusEl.classList.remove("hide");
+          statusEl.textContent = "File berekstensi .pdf tetapi isinya bukan PDF valid. Export ulang ke PDF (jangan hanya rename dari DOCX).";
+          return;
+        }
       }
 
       const sources = buildIframeSources(FILE_URL);
