@@ -216,6 +216,16 @@
         // Konfigurasi foto.
         const BACKGROUND_BASENAME = 'foto-shifa';
         const STACK_BASENAMES = ['shifa1', 'shifa2', 'shifa3', 'shifa4', 'shifa5', 'shifa6'];
+        const PRIMARY_EXTENSION_BY_BASE = {
+                'foto-shifa': 'jpeg',
+                shifa1: 'jpg',
+                shifa2: 'jpg',
+                shifa3: 'jpg',
+                shifa4: 'jpg',
+                shifa5: 'jpg',
+                shifa6: 'jpg'
+        };
+        const FALLBACK_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
 
         // Konfigurasi musik.
         const MUSIC_NAME = 'Menua Bersamamu - Tri Suaka  Kalimba Cover with Tabs.mp3';
@@ -246,13 +256,17 @@
         let phaseTwoStarted = false;
 
         function buildImageCandidates(baseName) {
-            const names = [`${baseName}.jpeg`, `${baseName}.jpg`, `${baseName}.png`, `${baseName}.webp`];
-            return names.flatMap((name) => [
-                `./assets/images/${encodeURIComponent(name)}`,
-                `./assets/image/${encodeURIComponent(name)}`,
-                `./assets/${encodeURIComponent(name)}`,
-                `./${encodeURIComponent(name)}`
-            ]);
+                const primaryExt = PRIMARY_EXTENSION_BY_BASE[baseName];
+                const orderedExts = primaryExt
+                        ? [primaryExt, ...FALLBACK_EXTENSIONS.filter((ext) => ext !== primaryExt)]
+                        : FALLBACK_EXTENSIONS;
+                const names = orderedExts.map((ext) => `${baseName}.${ext}`);
+                return names.flatMap((name) => [
+                        `./assets/images/${encodeURIComponent(name)}`,
+                        `./assets/image/${encodeURIComponent(name)}`,
+                        `./assets/${encodeURIComponent(name)}`,
+                        `./${encodeURIComponent(name)}`
+                ]);
         }
 
         function loadImage(testUrl) {
