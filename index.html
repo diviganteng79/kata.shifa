@@ -214,18 +214,8 @@
 
     <script>
         // Konfigurasi foto.
-        const BACKGROUND_BASENAME = 'foto-shifa';
-        const STACK_BASENAMES = ['shifa1', 'shifa2', 'shifa3', 'shifa4', 'shifa5', 'shifa6'];
-        const PRIMARY_EXTENSION_BY_BASE = {
-                'foto-shifa': 'jpeg',
-                shifa1: 'jpg',
-                shifa2: 'jpg',
-                shifa3: 'jpg',
-                shifa4: 'jpg',
-                shifa5: 'jpg',
-                shifa6: 'jpg'
-        };
-        const FALLBACK_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
+        const BACKGROUND_FILE = 'foto-shifa.jpeg';
+        const STACK_FILES = ['shifa1.jpg', 'shifa2.jpg', 'shifa3.jpg', 'shifa4.jpg', 'shifa5.jpg', 'shifa6.jpg'];
 
         // Konfigurasi musik.
         const MUSIC_NAME = 'Menua Bersamamu - Tri Suaka  Kalimba Cover with Tabs.mp3';
@@ -255,18 +245,8 @@
 
         let phaseTwoStarted = false;
 
-        function buildImageCandidates(baseName) {
-                const primaryExt = PRIMARY_EXTENSION_BY_BASE[baseName];
-                const orderedExts = primaryExt
-                        ? [primaryExt, ...FALLBACK_EXTENSIONS.filter((ext) => ext !== primaryExt)]
-                        : FALLBACK_EXTENSIONS;
-                const names = orderedExts.map((ext) => `${baseName}.${ext}`);
-                return names.flatMap((name) => [
-                        `./assets/images/${encodeURIComponent(name)}`,
-                        `./assets/image/${encodeURIComponent(name)}`,
-                        `./assets/${encodeURIComponent(name)}`,
-                        `./${encodeURIComponent(name)}`
-                ]);
+        function buildImageUrl(fileName) {
+                return `./assets/images/${encodeURIComponent(fileName)}`;
         }
 
         function loadImage(testUrl) {
@@ -278,13 +258,10 @@
             });
         }
 
-        async function resolveFirstAvailable(urls) {
-            for (const baseUrl of urls) {
+        async function resolveIfAvailable(baseUrl) {
                 const testUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}v=${encodeURIComponent(FILE_VERSION)}`;
                 const ok = await loadImage(testUrl);
-                if (ok) return baseUrl;
-            }
-            return null;
+                return ok ? baseUrl : null;
         }
 
         function createSlide(url) {
@@ -316,7 +293,7 @@
         }
 
         async function setupInitialBackground() {
-            const initialUrl = await resolveFirstAvailable(buildImageCandidates(BACKGROUND_BASENAME));
+            const initialUrl = await resolveIfAvailable(buildImageUrl(BACKGROUND_FILE));
             if (!initialUrl) {
                 photoHintEl.classList.add('show');
                 return null;
@@ -360,9 +337,9 @@
 
         async function startPhotoStackSequence() {
             const resolved = [];
-            for (const baseName of STACK_BASENAMES) {
-                const url = await resolveFirstAvailable(buildImageCandidates(baseName));
-                if (url) resolved.push(url);
+            for (const fileName of STACK_FILES) {
+                    const url = await resolveIfAvailable(buildImageUrl(fileName));
+                    if (url) resolved.push(url);
             }
 
             if (!resolved.length) {
