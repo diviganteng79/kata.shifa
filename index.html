@@ -7,9 +7,6 @@
   <style>
     :root {
       --bg: #111;
-      --card: #ffffff;
-      --text: #111;
-      --accent: #2a2a2a;
       --paper-image: url("./assets/images/foto-shifa.jpeg");
     }
 
@@ -38,39 +35,78 @@
     #paper {
       width: min(860px, 100%);
       height: min(90dvh, 760px);
-      background-color: var(--card);
-      background-image: linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.78)), var(--paper-image);
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
+      background-color: #fff;
       border-radius: 10px;
-      padding: clamp(18px, 3vw, 36px);
       overflow: hidden;
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
       border: 1px solid #d8d8d8;
       position: relative;
+      isolation: isolate;
+    }
+
+    #bgReel {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      background: #f4f4f4;
+    }
+
+    .bg-slide {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transform: translateY(0%);
+      transition: transform 2600ms ease;
+    }
+
+    .bg-slide::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(rgba(255,255,255,0.72), rgba(255,255,255,0.72));
+    }
+
+    .bg-slide.from-bottom { transform: translateY(105%); }
+    .bg-slide.active { transform: translateY(0%); }
+    .bg-slide.to-top { transform: translateY(-105%); }
+
+    #content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      padding: clamp(18px, 3vw, 36px);
+      display: flex;
+      flex-direction: column;
     }
 
     h1 {
       margin: 0 0 18px;
       font-size: clamp(22px, 3.2vw, 34px);
       text-align: center;
-      letter-spacing: .4px;
-      color: var(--text);
+      color: #111;
+      flex: 0 0 auto;
     }
 
     #lineStage {
-      height: calc(100% - 72px);
+      flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
       gap: 14px;
       overflow: hidden;
-      transition: justify-content 650ms ease;
+      transition: justify-content 650ms ease, transform 2400ms ease, opacity 2400ms ease;
     }
 
     #lineStage.final {
       justify-content: center;
+    }
+
+    #lineStage.fade-up {
+      transform: translateY(-120%);
+      opacity: 0;
     }
 
     .line {
@@ -81,8 +117,8 @@
       opacity: 0;
       transform: translateY(34px);
       animation: riseIn 900ms ease forwards;
-      word-wrap: break-word;
       text-align: left;
+      word-wrap: break-word;
     }
 
     .line b {
@@ -90,11 +126,39 @@
       font-weight: 700;
     }
 
+    #wopyuLayer {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: 84px;
+      overflow: hidden;
+      z-index: 3;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 600ms ease;
+    }
+
+    #wopyuLayer.show { opacity: 1; }
+
+    .wopyu-text {
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, 45dvh);
+      font-size: clamp(24px, 4vw, 48px);
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #7a0018;
+      text-shadow: 0 2px 6px rgba(255,255,255,.6);
+      white-space: nowrap;
+      animation: flyUp 9000ms linear forwards;
+    }
+
     #musicPrompt {
       position: absolute;
       right: 14px;
       bottom: 14px;
-      z-index: 5;
+      z-index: 6;
       border: 0;
       border-radius: 10px;
       padding: 10px 14px;
@@ -103,14 +167,13 @@
       background: rgba(0, 0, 0, 0.75);
       display: none;
     }
-
     #musicPrompt.show { display: inline-block; }
 
     #photoHint {
       position: absolute;
       left: 14px;
       bottom: 14px;
-      z-index: 5;
+      z-index: 6;
       margin: 0;
       padding: 8px 10px;
       border-radius: 8px;
@@ -118,55 +181,48 @@
       color: #fff;
       background: rgba(176, 0, 32, 0.85);
       display: none;
-      max-width: min(92vw, 420px);
+      max-width: min(92vw, 520px);
     }
-
     #photoHint.show { display: block; }
 
     @keyframes riseIn {
-      from {
-        opacity: 0;
-        transform: translateY(34px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(34px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes flyUp {
+      from { transform: translate(-50%, 45dvh); opacity: 0; }
+      12% { opacity: 1; }
+      86% { opacity: 1; }
+      to { transform: translate(-50%, -130%); opacity: 0; }
     }
   </style>
 </head>
 <body>
   <main id="app">
     <section id="paper" aria-label="Pesan untuk Shifa">
-      <h1>SHIFA DI BULAN APRIL</h1>
-      <div id="lineStage"></div>
+      <div id="bgReel"></div>
+      <div id="content">
+        <h1>SHIFA DI BULAN APRIL</h1>
+        <div id="lineStage"></div>
+      </div>
+      <div id="wopyuLayer"></div>
     </section>
     <button id="musicPrompt" type="button">Tap untuk putar musik</button>
     <p id="photoHint">Foto background tidak ditemukan. Upload ke assets/images lalu sesuaikan nama file.</p>
   </main>
 
   <script>
-    // Nama dasar foto (tanpa ekstensi). Script akan mencoba jpg/jpeg/jepg/png otomatis.
-    const PAPER_IMAGE_BASENAME = "foto-shifa";
-    const PAPER_IMAGE_NAMES = [
-      `${PAPER_IMAGE_BASENAME}.jpeg`,
-      `${PAPER_IMAGE_BASENAME}.jpg`,
-      `${PAPER_IMAGE_BASENAME}.jepg`,
-      `${PAPER_IMAGE_BASENAME}.png`
-    ];
-    const PAPER_IMAGE_CANDIDATES = PAPER_IMAGE_NAMES.flatMap((name) => [
-      `./assets/images/${encodeURIComponent(name)}`,
-      `./assets/image/${encodeURIComponent(name)}`,
-      `./assets/${encodeURIComponent(name)}`,
-      `./${encodeURIComponent(name)}`
-    ]);
+    // Konfigurasi foto.
+    const BACKGROUND_BASENAME = 'foto-shifa';
+    const STACK_BASENAMES = ['shifa1', 'shifa2', 'shifa3', 'shifa4', 'shifa5', 'shifa6'];
 
-    // Musik tetap dari folder assets/audio.
-    const MUSIC_NAME = "Menua Bersamamu - Tri Suaka  Kalimba Cover with Tabs.mp3";
-    const FILE_VERSION = "1";
+    // Konfigurasi musik.
+    const MUSIC_NAME = 'Menua Bersamamu - Tri Suaka  Kalimba Cover with Tabs.mp3';
+    const FILE_VERSION = '1';
     const MUSIC_URL = `./assets/audio/${encodeURIComponent(MUSIC_NAME)}`;
 
-    // Teks berjalan ke atas (muncul satu per satu, tidak hilang).
+    // Teks awal.
     const MESSAGE_LINES = [
       '<b>Shifa 07/04/2026</b>, Aku juga sayang ayang',
       '<b>Shifa 07/04/2026</b>, Jangan sayang, buat ayang ajaaa',
@@ -175,6 +231,8 @@
     ];
 
     const lineStageEl = document.getElementById('lineStage');
+    const wopyuLayerEl = document.getElementById('wopyuLayer');
+    const bgReelEl = document.getElementById('bgReel');
     const musicPromptEl = document.getElementById('musicPrompt');
     const photoHintEl = document.getElementById('photoHint');
 
@@ -182,6 +240,73 @@
     bgMusic.src = `${MUSIC_URL}${MUSIC_URL.includes('?') ? '&' : '?'}v=${encodeURIComponent(FILE_VERSION)}`;
     bgMusic.loop = true;
     bgMusic.preload = 'auto';
+
+    let phaseTwoStarted = false;
+
+    function buildImageCandidates(baseName) {
+      const names = [`${baseName}.jpeg`, `${baseName}.jpg`, `${baseName}.jepg`, `${baseName}.png`];
+      return names.flatMap((name) => [
+        `./assets/images/${encodeURIComponent(name)}`,
+        `./assets/image/${encodeURIComponent(name)}`,
+        `./assets/${encodeURIComponent(name)}`,
+        `./${encodeURIComponent(name)}`
+      ]);
+    }
+
+    async function resolveFirstAvailable(urls) {
+      for (const baseUrl of urls) {
+        const testUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}v=${encodeURIComponent(FILE_VERSION)}`;
+        try {
+          const response = await fetch(testUrl, { method: 'GET', cache: 'no-store' });
+          if (response.ok) return baseUrl;
+        } catch {
+          // lanjut kandidat berikutnya
+        }
+      }
+      return null;
+    }
+
+    function createSlide(url) {
+      const slide = document.createElement('div');
+      slide.className = 'bg-slide';
+      slide.style.backgroundImage = `url(${url})`;
+      return slide;
+    }
+
+    function transitionToNextSlide(nextUrl, keepFinal = false) {
+      const currentSlide = bgReelEl.querySelector('.bg-slide.active') || bgReelEl.querySelector('.bg-slide');
+      const nextSlide = createSlide(nextUrl);
+      nextSlide.classList.add('from-bottom');
+      bgReelEl.appendChild(nextSlide);
+
+      requestAnimationFrame(() => {
+        if (currentSlide) currentSlide.classList.add('to-top');
+        nextSlide.classList.remove('from-bottom');
+        nextSlide.classList.add('active');
+      });
+
+      setTimeout(() => {
+        if (currentSlide && currentSlide.parentNode) currentSlide.remove();
+        if (keepFinal) {
+          nextSlide.classList.remove('to-top');
+          nextSlide.classList.add('active');
+        }
+      }, 2800);
+    }
+
+    async function setupInitialBackground() {
+      const initialUrl = await resolveFirstAvailable(buildImageCandidates(BACKGROUND_BASENAME));
+      if (!initialUrl) {
+        photoHintEl.classList.add('show');
+        return null;
+      }
+      photoHintEl.classList.remove('show');
+      const first = createSlide(initialUrl);
+      first.classList.add('active');
+      bgReelEl.innerHTML = '';
+      bgReelEl.appendChild(first);
+      return initialUrl;
+    }
 
     async function startMusic() {
       try {
@@ -204,40 +329,55 @@
       window.addEventListener('pointerdown', resumeOnFirstTouch);
     }
 
-
-
-
-
-    async function resolveFirstAvailable(urls) {
-      for (const baseUrl of urls) {
-        const testUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}v=${encodeURIComponent(FILE_VERSION)}`;
-        try {
-          const response = await fetch(testUrl, { method: 'GET', cache: 'no-store' });
-          if (response.ok) return baseUrl;
-        } catch {
-          // lanjut ke kandidat berikutnya
-        }
-      }
-      return null;
+    function spawnWopyuText() {
+      const el = document.createElement('div');
+      el.className = 'wopyu-text';
+      el.textContent = 'wopyu sayangg';
+      wopyuLayerEl.appendChild(el);
+      setTimeout(() => el.remove(), 9200);
     }
 
-    async function validateBackgroundPhoto() {
-      const resolvedUrl = await resolveFirstAvailable(PAPER_IMAGE_CANDIDATES);
+    async function startPhotoStackSequence() {
+      const resolved = [];
+      for (const baseName of STACK_BASENAMES) {
+        const url = await resolveFirstAvailable(buildImageCandidates(baseName));
+        if (url) resolved.push(url);
+      }
 
-      if (resolvedUrl) {
-        document.documentElement.style.setProperty('--paper-image', `url(${resolvedUrl})`);
-        photoHintEl.classList.remove('show');
+      if (!resolved.length) {
+        photoHintEl.textContent = 'Foto shifa1 sampai shifa6 belum ditemukan di assets/images.';
+        photoHintEl.classList.add('show');
         return;
       }
 
-      const tried = PAPER_IMAGE_CANDIDATES.map((u) => decodeURIComponent(u)).join(' | ');
-      photoHintEl.textContent = `Foto background belum ketemu. Coba cek path ini: ${tried}`;
-      photoHintEl.classList.add('show');
+      photoHintEl.classList.remove('show');
+      let index = 0;
+      const interval = setInterval(() => {
+        const isFinal = index === resolved.length - 1;
+        transitionToNextSlide(resolved[index], isFinal);
+        index += 1;
+        if (isFinal) clearInterval(interval);
+      }, 5000);
+    }
+
+    function startPhaseTwo() {
+      if (phaseTwoStarted) return;
+      phaseTwoStarted = true;
+
+      lineStageEl.classList.add('fade-up');
+      wopyuLayerEl.classList.add('show');
+
+      spawnWopyuText();
+      const ticker = setInterval(spawnWopyuText, 2600);
+      setTimeout(() => clearInterval(ticker), 20000);
+
+      startPhotoStackSequence();
     }
 
     function appendNextLine(index = 0) {
       if (index >= MESSAGE_LINES.length) {
         lineStageEl.classList.add('final');
+        setTimeout(startPhaseTwo, 3000);
         return;
       }
 
@@ -250,7 +390,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
-      validateBackgroundPhoto();
+      await setupInitialBackground();
       appendNextLine(0);
       setupMusicFallback();
       await startMusic();
