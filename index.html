@@ -224,7 +224,7 @@
         const MUSIC_NAME = 'Menua Bersamamu - Tri Suaka  Kalimba Cover with Tabs.mp3';
         const FILE_VERSION = '1';
         const MUSIC_URL = `./assets/audio/${encodeURIComponent(MUSIC_NAME)}`;
-        const STACK_INTERVAL_MS = 1800;
+        const STACK_INTERVAL_MS = 3000;
         const WOPYU_LIFETIME_MS = 3200;
 
         // Teks awal.
@@ -368,12 +368,12 @@
 
             lineStageEl.classList.add('fade-up');
             wopyuLayerEl.classList.add('show');
+            bgReelEl.classList.add('dark-overlay');
 
             const wopyuEl = spawnWopyuText();
             setTimeout(() => {
                 wopyuEl.remove();
                 wopyuLayerEl.classList.remove('show');
-                bgReelEl.classList.add('dark-overlay');
                 startPhotoStackSequence();
             }, WOPYU_LIFETIME_MS);
         }
