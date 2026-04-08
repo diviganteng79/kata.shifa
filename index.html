@@ -68,6 +68,9 @@
             inset: 0;
             background: linear-gradient(rgba(255,255,255,0.72), rgba(255,255,255,0.72));
         }
+        #bgReel.dark-overlay .bg-slide::after {
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5));
+        }
 
         .bg-slide.from-bottom { transform: translateY(105%); }
         .bg-slide.active { transform: translateY(0%); }
@@ -151,7 +154,7 @@
             color: #7a0018;
             text-shadow: 0 2px 6px rgba(255,255,255,.6);
             white-space: nowrap;
-            animation: flyUp 9000ms linear forwards;
+            animation: flyUp var(--wopyu-duration, 3200ms) linear forwards;
         }
 
         #musicPrompt {
@@ -221,8 +224,8 @@
         const MUSIC_NAME = 'Menua Bersamamu - Tri Suaka  Kalimba Cover with Tabs.mp3';
         const FILE_VERSION = '1';
         const MUSIC_URL = `./assets/audio/${encodeURIComponent(MUSIC_NAME)}`;
-        const STACK_INTERVAL_MS = 5000;
-        const WOPYU_LIFETIME_MS = 9200;
+        const STACK_INTERVAL_MS = 1800;
+        const WOPYU_LIFETIME_MS = 3200;
 
         // Teks awal.
         const MESSAGE_LINES = [
@@ -332,7 +335,7 @@
             el.className = 'wopyu-text';
             el.textContent = 'wopyu sayang';
             wopyuLayerEl.appendChild(el);
-            setTimeout(() => el.remove(), WOPYU_LIFETIME_MS);
+            return el;
         }
 
         async function startPhotoStackSequence() {
@@ -366,11 +369,13 @@
             lineStageEl.classList.add('fade-up');
             wopyuLayerEl.classList.add('show');
 
-            spawnWopyuText();
-            const ticker = setInterval(spawnWopyuText, 2600);
-            setTimeout(() => clearInterval(ticker), 20000);
-
-            startPhotoStackSequence();
+            const wopyuEl = spawnWopyuText();
+            setTimeout(() => {
+                wopyuEl.remove();
+                wopyuLayerEl.classList.remove('show');
+                bgReelEl.classList.add('dark-overlay');
+                startPhotoStackSequence();
+            }, WOPYU_LIFETIME_MS);
         }
 
         function appendNextLine(index = 0) {
