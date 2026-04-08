@@ -244,7 +244,7 @@
     let phaseTwoStarted = false;
 
     function buildImageCandidates(baseName) {
-      const names = [`${baseName}.jpeg`, `${baseName}.jpg`, `${baseName}.jepg`, `${baseName}.png`];
+      const names = [`${baseName}.jpeg`, `${baseName}.jpg`, `${baseName}.png`, `${baseName}.webp`];
       return names.flatMap((name) => [
         `./assets/images/${encodeURIComponent(name)}`,
         `./assets/image/${encodeURIComponent(name)}`,
@@ -253,15 +253,20 @@
       ]);
     }
 
+    function loadImage(testUrl) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = testUrl;
+      });
+    }
+
     async function resolveFirstAvailable(urls) {
       for (const baseUrl of urls) {
         const testUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}v=${encodeURIComponent(FILE_VERSION)}`;
-        try {
-          const response = await fetch(testUrl, { method: 'GET', cache: 'no-store' });
-          if (response.ok) return baseUrl;
-        } catch {
-          // lanjut kandidat berikutnya
-        }
+        const ok = await loadImage(testUrl);
+        if (ok) return baseUrl;
       }
       return null;
     }
@@ -332,7 +337,7 @@
     function spawnWopyuText() {
       const el = document.createElement('div');
       el.className = 'wopyu-text';
-      el.textContent = 'wopyu sayangg';
+      el.textContent = 'wopyu sayang';
       wopyuLayerEl.appendChild(el);
       setTimeout(() => el.remove(), 9200);
     }
@@ -352,12 +357,13 @@
 
       photoHintEl.classList.remove('show');
       let index = 0;
-      const interval = setInterval(() => {
+      const run = () => {
         const isFinal = index === resolved.length - 1;
         transitionToNextSlide(resolved[index], isFinal);
         index += 1;
-        if (isFinal) clearInterval(interval);
-      }, 5000);
+        if (!isFinal) setTimeout(run, 5000);
+      };
+      run();
     }
 
     function startPhaseTwo() {
