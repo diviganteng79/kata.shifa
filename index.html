@@ -1,406 +1,408 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>SHIFA DI BULAN APRIL</title>
-  <style>
-    :root {
-      --bg: #111;
-      --paper-image: url("./assets/images/foto-shifa.jpeg");
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>SHIFA DI BULAN APRIL</title>
+    <style>
+        :root {
+            --bg: #111;
+            --paper-image: url("./assets/images/foto-shifa.jpeg");
+        }
 
-    * { box-sizing: border-box; }
+        * { box-sizing: border-box; }
 
-    html, body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      overflow: hidden;
-      background: var(--bg);
-      font-family: Arial, Helvetica, sans-serif;
-    }
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            font-family: Arial, Helvetica, sans-serif;
+        }
 
-    #app {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100dvh;
-      display: grid;
-      place-items: center;
-      padding: 16px;
-      background: radial-gradient(circle at center, #2a2a2a 0%, #111 65%);
-    }
+        #app {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100dvh;
+            display: grid;
+            place-items: center;
+            padding: 16px;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #111 65%);
+        }
 
-    #paper {
-      width: min(860px, 100%);
-      height: min(90dvh, 760px);
-      background-color: #fff;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-      border: 1px solid #d8d8d8;
-      position: relative;
-      isolation: isolate;
-    }
+        #paper {
+            width: min(860px, 100%);
+            height: min(90dvh, 760px);
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+            border: 1px solid #d8d8d8;
+            position: relative;
+            isolation: isolate;
+        }
 
-    #bgReel {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      overflow: hidden;
-      background: #f4f4f4;
-    }
+        #bgReel {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            background: #f4f4f4;
+        }
 
-    .bg-slide {
-      position: absolute;
-      inset: 0;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      transform: translateY(0%);
-      transition: transform 2600ms ease;
-    }
+        .bg-slide {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transform: translateY(0%);
+            transition: transform 2600ms ease;
+        }
 
-    .bg-slide::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(rgba(255,255,255,0.72), rgba(255,255,255,0.72));
-    }
+        .bg-slide::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(255,255,255,0.72), rgba(255,255,255,0.72));
+        }
 
-    .bg-slide.from-bottom { transform: translateY(105%); }
-    .bg-slide.active { transform: translateY(0%); }
-    .bg-slide.to-top { transform: translateY(-105%); }
+        .bg-slide.from-bottom { transform: translateY(105%); }
+        .bg-slide.active { transform: translateY(0%); }
+        .bg-slide.to-top { transform: translateY(-105%); }
 
-    #content {
-      position: relative;
-      z-index: 2;
-      height: 100%;
-      padding: clamp(18px, 3vw, 36px);
-      display: flex;
-      flex-direction: column;
-    }
+        #content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            padding: clamp(18px, 3vw, 36px);
+            display: flex;
+            flex-direction: column;
+        }
 
-    h1 {
-      margin: 0 0 18px;
-      font-size: clamp(22px, 3.2vw, 34px);
-      text-align: center;
-      color: #111;
-      flex: 0 0 auto;
-    }
+        h1 {
+            margin: 0 0 18px;
+            font-size: clamp(22px, 3.2vw, 34px);
+            text-align: center;
+            color: #111;
+            flex: 0 0 auto;
+        }
 
-    #lineStage {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      gap: 14px;
-      overflow: hidden;
-      transition: justify-content 650ms ease, transform 2400ms ease, opacity 2400ms ease;
-    }
+        #lineStage {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            gap: 14px;
+            overflow: hidden;
+            transition: justify-content 650ms ease, transform 2400ms ease, opacity 2400ms ease;
+        }
 
-    #lineStage.final {
-      justify-content: center;
-    }
+        #lineStage.final {
+            justify-content: center;
+        }
 
-    #lineStage.fade-up {
-      transform: translateY(-120%);
-      opacity: 0;
-    }
+        #lineStage.fade-up {
+            transform: translateY(-120%);
+            opacity: 0;
+        }
 
-    .line {
-      margin: 0;
-      font-size: clamp(17px, 2.2vw, 30px);
-      line-height: 1.35;
-      color: #111;
-      opacity: 0;
-      transform: translateY(34px);
-      animation: riseIn 900ms ease forwards;
-      text-align: left;
-      word-wrap: break-word;
-    }
+        .line {
+            margin: 0;
+            font-size: clamp(17px, 2.2vw, 30px);
+            line-height: 1.35;
+            color: #111;
+            opacity: 0;
+            transform: translateY(34px);
+            animation: riseIn 900ms ease forwards;
+            text-align: left;
+            word-wrap: break-word;
+        }
 
-    .line b {
-      font-style: italic;
-      font-weight: 700;
-    }
+        .line b {
+            font-style: italic;
+            font-weight: 700;
+        }
 
-    #wopyuLayer {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      top: 84px;
-      overflow: hidden;
-      z-index: 3;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 600ms ease;
-    }
+        #wopyuLayer {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: 84px;
+            overflow: hidden;
+            z-index: 3;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 600ms ease;
+        }
 
-    #wopyuLayer.show { opacity: 1; }
+        #wopyuLayer.show { opacity: 1; }
 
-    .wopyu-text {
-      position: absolute;
-      left: 50%;
-      transform: translate(-50%, 45dvh);
-      font-size: clamp(24px, 4vw, 48px);
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: #7a0018;
-      text-shadow: 0 2px 6px rgba(255,255,255,.6);
-      white-space: nowrap;
-      animation: flyUp 9000ms linear forwards;
-    }
+        .wopyu-text {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, 45dvh);
+            font-size: clamp(24px, 4vw, 48px);
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #7a0018;
+            text-shadow: 0 2px 6px rgba(255,255,255,.6);
+            white-space: nowrap;
+            animation: flyUp 9000ms linear forwards;
+        }
 
-    #musicPrompt {
-      position: absolute;
-      right: 14px;
-      bottom: 14px;
-      z-index: 6;
-      border: 0;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 14px;
-      color: #fff;
-      background: rgba(0, 0, 0, 0.75);
-      display: none;
-    }
-    #musicPrompt.show { display: inline-block; }
+        #musicPrompt {
+            position: absolute;
+            right: 14px;
+            bottom: 14px;
+            z-index: 6;
+            border: 0;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 14px;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.75);
+            display: none;
+        }
+        #musicPrompt.show { display: inline-block; }
 
-    #photoHint {
-      position: absolute;
-      left: 14px;
-      bottom: 14px;
-      z-index: 6;
-      margin: 0;
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      color: #fff;
-      background: rgba(176, 0, 32, 0.85);
-      display: none;
-      max-width: min(92vw, 520px);
-    }
-    #photoHint.show { display: block; }
+        #photoHint {
+            position: absolute;
+            left: 14px;
+            bottom: 14px;
+            z-index: 6;
+            margin: 0;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #fff;
+            background: rgba(176, 0, 32, 0.85);
+            display: none;
+            max-width: min(92vw, 520px);
+        }
+        #photoHint.show { display: block; }
 
-    @keyframes riseIn {
-      from { opacity: 0; transform: translateY(34px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+        @keyframes riseIn {
+            from { opacity: 0; transform: translateY(34px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-    @keyframes flyUp {
-      from { transform: translate(-50%, 45dvh); opacity: 0; }
-      12% { opacity: 1; }
-      86% { opacity: 1; }
-      to { transform: translate(-50%, -130%); opacity: 0; }
-    }
-  </style>
+        @keyframes flyUp {
+            from { transform: translate(-50%, 45dvh); opacity: 0; }
+            12% { opacity: 1; }
+            86% { opacity: 1; }
+            to { transform: translate(-50%, -130%); opacity: 0; }
+        }
+    </style>
 </head>
 <body>
-  <main id="app">
-    <section id="paper" aria-label="Pesan untuk Shifa">
-      <div id="bgReel"></div>
-      <div id="content">
-        <h1>SHIFA DI BULAN APRIL</h1>
-        <div id="lineStage"></div>
-      </div>
-      <div id="wopyuLayer"></div>
-    </section>
-    <button id="musicPrompt" type="button">Tap untuk putar musik</button>
-    <p id="photoHint">Foto background tidak ditemukan. Upload ke assets/images lalu sesuaikan nama file.</p>
-  </main>
+    <main id="app">
+        <section id="paper" aria-label="Pesan untuk Shifa">
+            <div id="bgReel"></div>
+            <div id="content">
+                <h1>SHIFA DI BULAN APRIL</h1>
+                <div id="lineStage"></div>
+            </div>
+            <div id="wopyuLayer"></div>
+        </section>
+        <button id="musicPrompt" type="button">Tap untuk putar musik</button>
+        <p id="photoHint">Foto background tidak ditemukan. Upload ke assets/images lalu sesuaikan nama file.</p>
+    </main>
 
-  <script>
-    // Konfigurasi foto.
-    const BACKGROUND_BASENAME = 'foto-shifa';
-    const STACK_BASENAMES = ['shifa1', 'shifa2', 'shifa3', 'shifa4', 'shifa5', 'shifa6'];
+    <script>
+        // Konfigurasi foto.
+        const BACKGROUND_BASENAME = 'foto-shifa';
+        const STACK_BASENAMES = ['shifa1', 'shifa2', 'shifa3', 'shifa4', 'shifa5', 'shifa6'];
 
-    // Konfigurasi musik.
-    const MUSIC_NAME = 'Menua Bersamamu - Tri Suaka  Kalimba Cover with Tabs.mp3';
-    const FILE_VERSION = '1';
-    const MUSIC_URL = `./assets/audio/${encodeURIComponent(MUSIC_NAME)}`;
+        // Konfigurasi musik.
+        const MUSIC_NAME = 'Menua Bersamamu - Tri Suaka  Kalimba Cover with Tabs.mp3';
+        const FILE_VERSION = '1';
+        const MUSIC_URL = `./assets/audio/${encodeURIComponent(MUSIC_NAME)}`;
+        const STACK_INTERVAL_MS = 5000;
+        const WOPYU_LIFETIME_MS = 9200;
 
-    // Teks awal.
-    const MESSAGE_LINES = [
-      '<b>Shifa 07/04/2026</b>, Aku juga sayang ayang',
-      '<b>Shifa 07/04/2026</b>, Jangan sayang, buat ayang ajaaa',
-      '<b>Shifa 07/04/2026</b>, Iya sayang makasih ayang uda perhatian ke aku, tapi aku gak mau kalo sampe ayang ke susahan karna aku',
-      '<b>Shifa 07/04/2026</b>, Sayang makasih yaa, Buat semuanya'
-    ];
+        // Teks awal.
+        const MESSAGE_LINES = [
+            '<b>Shifa 07/04/2026</b>, Aku juga sayang ayang',
+            '<b>Shifa 07/04/2026</b>, Jangan sayang, buat ayang ajaaa',
+            '<b>Shifa 07/04/2026</b>, Iya sayang makasih ayang uda perhatian ke aku, tapi aku gak mau kalo sampe ayang ke susahan karna aku',
+            '<b>Shifa 07/04/2026</b>, Sayang makasih yaa, Buat semuanya'
+        ];
 
-    const lineStageEl = document.getElementById('lineStage');
-    const wopyuLayerEl = document.getElementById('wopyuLayer');
-    const bgReelEl = document.getElementById('bgReel');
-    const musicPromptEl = document.getElementById('musicPrompt');
-    const photoHintEl = document.getElementById('photoHint');
+        const lineStageEl = document.getElementById('lineStage');
+        const wopyuLayerEl = document.getElementById('wopyuLayer');
+        const bgReelEl = document.getElementById('bgReel');
+        const musicPromptEl = document.getElementById('musicPrompt');
+        const photoHintEl = document.getElementById('photoHint');
 
-    const bgMusic = new Audio();
-    bgMusic.src = `${MUSIC_URL}${MUSIC_URL.includes('?') ? '&' : '?'}v=${encodeURIComponent(FILE_VERSION)}`;
-    bgMusic.loop = true;
-    bgMusic.preload = 'auto';
+        const bgMusic = new Audio();
+        bgMusic.src = `${MUSIC_URL}${MUSIC_URL.includes('?') ? '&' : '?'}v=${encodeURIComponent(FILE_VERSION)}`;
+        bgMusic.loop = true;
+        bgMusic.preload = 'auto';
 
-    let phaseTwoStarted = false;
+        let phaseTwoStarted = false;
 
-    function buildImageCandidates(baseName) {
-      const names = [`${baseName}.jpeg`, `${baseName}.jpg`, `${baseName}.png`, `${baseName}.webp`];
-      return names.flatMap((name) => [
-        `./assets/images/${encodeURIComponent(name)}`,
-        `./assets/image/${encodeURIComponent(name)}`,
-        `./assets/${encodeURIComponent(name)}`,
-        `./${encodeURIComponent(name)}`
-      ]);
-    }
-
-    function loadImage(testUrl) {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => resolve(true);
-        img.onerror = () => resolve(false);
-        img.src = testUrl;
-      });
-    }
-
-    async function resolveFirstAvailable(urls) {
-      for (const baseUrl of urls) {
-        const testUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}v=${encodeURIComponent(FILE_VERSION)}`;
-        const ok = await loadImage(testUrl);
-        if (ok) return baseUrl;
-      }
-      return null;
-    }
-
-    function createSlide(url) {
-      const slide = document.createElement('div');
-      slide.className = 'bg-slide';
-      slide.style.backgroundImage = `url(${url})`;
-      return slide;
-    }
-
-    function transitionToNextSlide(nextUrl, keepFinal = false) {
-      const currentSlide = bgReelEl.querySelector('.bg-slide.active') || bgReelEl.querySelector('.bg-slide');
-      const nextSlide = createSlide(nextUrl);
-      nextSlide.classList.add('from-bottom');
-      bgReelEl.appendChild(nextSlide);
-
-      requestAnimationFrame(() => {
-        if (currentSlide) currentSlide.classList.add('to-top');
-        nextSlide.classList.remove('from-bottom');
-        nextSlide.classList.add('active');
-      });
-
-      setTimeout(() => {
-        if (currentSlide && currentSlide.parentNode) currentSlide.remove();
-        if (keepFinal) {
-          nextSlide.classList.remove('to-top');
-          nextSlide.classList.add('active');
+        function buildImageCandidates(baseName) {
+            const names = [`${baseName}.jpeg`, `${baseName}.jpg`, `${baseName}.png`, `${baseName}.webp`];
+            return names.flatMap((name) => [
+                `./assets/images/${encodeURIComponent(name)}`,
+                `./assets/image/${encodeURIComponent(name)}`,
+                `./assets/${encodeURIComponent(name)}`,
+                `./${encodeURIComponent(name)}`
+            ]);
         }
-      }, 2800);
-    }
 
-    async function setupInitialBackground() {
-      const initialUrl = await resolveFirstAvailable(buildImageCandidates(BACKGROUND_BASENAME));
-      if (!initialUrl) {
-        photoHintEl.classList.add('show');
-        return null;
-      }
-      photoHintEl.classList.remove('show');
-      const first = createSlide(initialUrl);
-      first.classList.add('active');
-      bgReelEl.innerHTML = '';
-      bgReelEl.appendChild(first);
-      return initialUrl;
-    }
+        function loadImage(testUrl) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = testUrl;
+            });
+        }
 
-    async function startMusic() {
-      try {
-        await bgMusic.play();
-        musicPromptEl.classList.remove('show');
-      } catch {
-        musicPromptEl.classList.add('show');
-      }
-    }
+        async function resolveFirstAvailable(urls) {
+            for (const baseUrl of urls) {
+                const testUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}v=${encodeURIComponent(FILE_VERSION)}`;
+                const ok = await loadImage(testUrl);
+                if (ok) return baseUrl;
+            }
+            return null;
+        }
 
-    function setupMusicFallback() {
-      musicPromptEl.addEventListener('click', async () => {
-        await startMusic();
-      });
+        function createSlide(url) {
+            const slide = document.createElement('div');
+            slide.className = 'bg-slide';
+            slide.style.backgroundImage = `url(${url})`;
+            return slide;
+        }
 
-      const resumeOnFirstTouch = async () => {
-        if (bgMusic.paused) await startMusic();
-        window.removeEventListener('pointerdown', resumeOnFirstTouch);
-      };
-      window.addEventListener('pointerdown', resumeOnFirstTouch);
-    }
+        function transitionToNextSlide(nextUrl, keepFinal = false) {
+            const currentSlide = bgReelEl.querySelector('.bg-slide.active') || bgReelEl.querySelector('.bg-slide');
+            const nextSlide = createSlide(nextUrl);
+            nextSlide.classList.add('from-bottom');
+            bgReelEl.appendChild(nextSlide);
 
-    function spawnWopyuText() {
-      const el = document.createElement('div');
-      el.className = 'wopyu-text';
-      el.textContent = 'wopyu sayang';
-      wopyuLayerEl.appendChild(el);
-      setTimeout(() => el.remove(), 9200);
-    }
+            requestAnimationFrame(() => {
+                if (currentSlide) currentSlide.classList.add('to-top');
+                nextSlide.classList.remove('from-bottom');
+                nextSlide.classList.add('active');
+            });
 
-    async function startPhotoStackSequence() {
-      const resolved = [];
-      for (const baseName of STACK_BASENAMES) {
-        const url = await resolveFirstAvailable(buildImageCandidates(baseName));
-        if (url) resolved.push(url);
-      }
+            setTimeout(() => {
+                if (currentSlide && currentSlide.parentNode) currentSlide.remove();
+                if (keepFinal) {
+                    nextSlide.classList.remove('to-top');
+                    nextSlide.classList.add('active');
+                }
+            }, 2800);
+        }
 
-      if (!resolved.length) {
-        photoHintEl.textContent = 'Foto shifa1 sampai shifa6 belum ditemukan di assets/images.';
-        photoHintEl.classList.add('show');
-        return;
-      }
+        async function setupInitialBackground() {
+            const initialUrl = await resolveFirstAvailable(buildImageCandidates(BACKGROUND_BASENAME));
+            if (!initialUrl) {
+                photoHintEl.classList.add('show');
+                return null;
+            }
+            photoHintEl.classList.remove('show');
+            const first = createSlide(initialUrl);
+            first.classList.add('active');
+            bgReelEl.innerHTML = '';
+            bgReelEl.appendChild(first);
+            return initialUrl;
+        }
 
-      photoHintEl.classList.remove('show');
-      let index = 0;
-      const run = () => {
-        const isFinal = index === resolved.length - 1;
-        transitionToNextSlide(resolved[index], isFinal);
-        index += 1;
-        if (!isFinal) setTimeout(run, 5000);
-      };
-      run();
-    }
+        async function startMusic() {
+            try {
+                await bgMusic.play();
+                musicPromptEl.classList.remove('show');
+            } catch {
+                musicPromptEl.classList.add('show');
+            }
+        }
 
-    function startPhaseTwo() {
-      if (phaseTwoStarted) return;
-      phaseTwoStarted = true;
+        function setupMusicFallback() {
+            musicPromptEl.addEventListener('click', async () => {
+                await startMusic();
+            });
 
-      lineStageEl.classList.add('fade-up');
-      wopyuLayerEl.classList.add('show');
+            const resumeOnFirstTouch = async () => {
+                if (bgMusic.paused) await startMusic();
+                window.removeEventListener('pointerdown', resumeOnFirstTouch);
+            };
+            window.addEventListener('pointerdown', resumeOnFirstTouch);
+        }
 
-      spawnWopyuText();
-      const ticker = setInterval(spawnWopyuText, 2600);
-      setTimeout(() => clearInterval(ticker), 20000);
+        function spawnWopyuText() {
+            const el = document.createElement('div');
+            el.className = 'wopyu-text';
+            el.textContent = 'wopyu sayang';
+            wopyuLayerEl.appendChild(el);
+            setTimeout(() => el.remove(), WOPYU_LIFETIME_MS);
+        }
 
-      startPhotoStackSequence();
-    }
+        async function startPhotoStackSequence() {
+            const resolved = [];
+            for (const baseName of STACK_BASENAMES) {
+                const url = await resolveFirstAvailable(buildImageCandidates(baseName));
+                if (url) resolved.push(url);
+            }
 
-    function appendNextLine(index = 0) {
-      if (index >= MESSAGE_LINES.length) {
-        lineStageEl.classList.add('final');
-        setTimeout(startPhaseTwo, 3000);
-        return;
-      }
+            if (!resolved.length) {
+                photoHintEl.textContent = 'Foto shifa1 sampai shifa6 belum ditemukan di assets/images.';
+                photoHintEl.classList.add('show');
+                return;
+            }
 
-      const p = document.createElement('p');
-      p.className = 'line';
-      p.innerHTML = MESSAGE_LINES[index];
-      lineStageEl.appendChild(p);
+            photoHintEl.classList.remove('show');
+            let index = 0;
+            const run = () => {
+                const isFinal = index === resolved.length - 1;
+                transitionToNextSlide(resolved[index], isFinal);
+                index += 1;
+                if (!isFinal) setTimeout(run, STACK_INTERVAL_MS);
+            };
+            run();
+        }
 
-      setTimeout(() => appendNextLine(index + 1), 1300);
-    }
+        function startPhaseTwo() {
+            if (phaseTwoStarted) return;
+            phaseTwoStarted = true;
 
-    window.addEventListener('DOMContentLoaded', async () => {
-      await setupInitialBackground();
-      appendNextLine(0);
-      setupMusicFallback();
-      await startMusic();
-    });
-  </script>
+            lineStageEl.classList.add('fade-up');
+            wopyuLayerEl.classList.add('show');
+
+            spawnWopyuText();
+            const ticker = setInterval(spawnWopyuText, 2600);
+            setTimeout(() => clearInterval(ticker), 20000);
+
+            startPhotoStackSequence();
+        }
+
+        function appendNextLine(index = 0) {
+            if (index >= MESSAGE_LINES.length) {
+                lineStageEl.classList.add('final');
+                setTimeout(startPhaseTwo, 3000);
+                return;
+            }
+
+            const p = document.createElement('p');
+            p.className = 'line';
+            p.innerHTML = MESSAGE_LINES[index];
+            lineStageEl.appendChild(p);
+
+            setTimeout(() => appendNextLine(index + 1), 1300);
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            await setupInitialBackground();
+            appendNextLine(0);
+            setupMusicFallback();
+            await startMusic();
+        });
+    </script>
 </body>
 </html>
