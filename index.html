@@ -79,6 +79,25 @@
       margin-top: 28px;
     }
 
+    #musicPrompt {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 2;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.82);
+      display: none;
+      cursor: pointer;
+    }
+
+    #musicPrompt.show {
+      display: inline-block;
+    }
+
     @media (max-width: 640px) {
       article {
         line-height: 1.62;
@@ -90,6 +109,7 @@
   <audio id="bgMusic" autoplay loop preload="auto">
     <source src="./assets/audio/Menua%20Bersamamu%20-%20Tri%20Suaka%20%20Kalimba%20Cover%20with%20Tabs.mp3" type="audio/mpeg" />
   </audio>
+  <button id="musicPrompt" type="button">Tap untuk putar musik</button>
 
   <main>
     <article id="letter">
@@ -115,9 +135,22 @@ Hmm... aku rasa udah cukup bermpamitannya, maaf ya kalo terlalu panjang, semoga 
 
   <script>
     const bgMusic = document.getElementById('bgMusic');
-    bgMusic.play().catch(() => {
-      // browser autoplay policy bisa mencegah autoplay tanpa interaksi.
-    });
+    const musicPrompt = document.getElementById('musicPrompt');
+
+    async function startMusic() {
+      try {
+        bgMusic.muted = false;
+        await bgMusic.play();
+        musicPrompt.classList.remove('show');
+      } catch {
+        musicPrompt.classList.add('show');
+      }
+    }
+
+    musicPrompt.addEventListener('click', startMusic);
+    window.addEventListener('pointerdown', startMusic, { once: true });
+    window.addEventListener('keydown', startMusic, { once: true });
+    startMusic();
   </script>
 </body>
 </html>
